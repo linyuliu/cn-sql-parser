@@ -38,8 +38,9 @@ class LimitRewriteRule(private val maxRows: Long) : SqlRewriteRule {
         if (existing != null) {
             val existingLit = existing.limit as? LiteralExpr
             if (existingLit?.literalType == LiteralType.INTEGER) {
-                val existingVal = (existingLit.value as? Number)?.toLong() ?: maxRows
-                if (existingVal <= maxRows) return stmt
+                val existingVal = (existingLit.value as? Number)?.toLong()
+                // Only preserve the existing limit if it is a valid number and <= maxRows
+                if (existingVal != null && existingVal <= maxRows) return stmt
             }
         }
 

@@ -96,10 +96,7 @@ internal class PostgreSqlAstVisitor(private val ctx: ParseContext) : PostgreSqlP
 
     override fun visitInsertStatement(insertCtx: PostgreSqlParser.InsertStatementContext): Any {
         val tableName = insertCtx.tableName()
-        val table = TableRef(
-            name = tableName.id(0).text,
-            schema = if (tableName.id().size > 1) tableName.id(0).text else null
-        )
+        val table = tableRefFrom(tableName)
         return InsertStmt(
             table = table,
             sourceText = insertCtx.text,
@@ -111,10 +108,7 @@ internal class PostgreSqlAstVisitor(private val ctx: ParseContext) : PostgreSqlP
 
     override fun visitUpdateStatement(updateCtx: PostgreSqlParser.UpdateStatementContext): Any {
         val tableName = updateCtx.tableName()
-        val table = TableRef(
-            name = tableName.id(0).text,
-            schema = if (tableName.id().size > 1) tableName.id(0).text else null
-        )
+        val table = tableRefFrom(tableName)
         return UpdateStmt(
             table = table,
             assignments = emptyList(),
@@ -127,10 +121,7 @@ internal class PostgreSqlAstVisitor(private val ctx: ParseContext) : PostgreSqlP
 
     override fun visitDeleteStatement(deleteCtx: PostgreSqlParser.DeleteStatementContext): Any {
         val tableName = deleteCtx.tableName()
-        val table = TableRef(
-            name = tableName.id(0).text,
-            schema = if (tableName.id().size > 1) tableName.id(0).text else null
-        )
+        val table = tableRefFrom(tableName)
         return DeleteStmt(
             table = table,
             sourceText = deleteCtx.text,
@@ -142,10 +133,7 @@ internal class PostgreSqlAstVisitor(private val ctx: ParseContext) : PostgreSqlP
 
     override fun visitCreateTableStatement(createCtx: PostgreSqlParser.CreateTableStatementContext): Any {
         val tableName = createCtx.tableName()
-        val table = TableRef(
-            name = tableName.id(0).text,
-            schema = if (tableName.id().size > 1) tableName.id(0).text else null
-        )
+        val table = tableRefFrom(tableName)
         return CreateTableStmt(
             table = table,
             columns = emptyList(),
@@ -158,10 +146,7 @@ internal class PostgreSqlAstVisitor(private val ctx: ParseContext) : PostgreSqlP
 
     override fun visitAlterTableStatement(alterCtx: PostgreSqlParser.AlterTableStatementContext): Any {
         val tableName = alterCtx.tableName()
-        val table = TableRef(
-            name = tableName.id(0).text,
-            schema = if (tableName.id().size > 1) tableName.id(0).text else null
-        )
+        val table = tableRefFrom(tableName)
         return AlterTableStmt(
             table = table,
             actions = emptyList(),
@@ -181,5 +166,18 @@ internal class PostgreSqlAstVisitor(private val ctx: ParseContext) : PostgreSqlP
             compatibilityMode = ctx.mode,
             position = ParsePosition(dropCtx.start.line, dropCtx.start.charPositionInLine)
         )
+    }
+
+    /**
+     * tableName : id DOT id | id
+     * id(0) = schema (when 2 ids), id(1) = name; or id(0) = name (when 1 id)
+     */
+    private fun tableRefFrom(tableNameCtx: PostgreSqlParser.TableNameContext): TableRef {
+        val ids = tableNameCtx.id()
+        return if (ids.size >= 2) {
+            TableRef(name = ids[1].text, schema = ids[0].text)
+        } else {
+            TableRef(name = ids[0].text)
+        }
     }
 }

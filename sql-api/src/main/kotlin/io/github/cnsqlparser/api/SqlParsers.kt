@@ -112,17 +112,32 @@ object SqlParsers {
     // ─── Rewrite ──────────────────────────────────────────────────────────────
 
     /**
-     * 为SELECT语句添加LIMIT
+     * 为SELECT语句添加LIMIT（仅处理单条SQL语句）
      *
      * 根据方言和兼容模式自动选择正确的分页语法。
+     * 注意：仅返回改写后的第一条语句的文本；如需处理多条语句，请使用 rewriteAll。
      */
     @JvmStatic
     fun addLimit(sql: String, dialect: ProductDialect, maxRows: Long): String {
         val ctx = ParseContext(sql, dialect)
         val result = parse(ctx)
         val pipeline = SqlRewritePipeline().withRule(LimitRewriteRule(maxRows))
-        val rewritten = result.statements.map { stmt -> pipeline.rewrite(stmt, ctx) }
-        return rewritten.firstOrNull()?.sourceText ?: sql
+        return result.statements
+            .map { stmt -> pipeline.rewrite(stmt, ctx) }
+            .joinToString("; ") { it.sourceText ?: sql }
+            .ifBlank { sql }
+    }
+
+    /**
+     * 对所有语句应用改写管道，返回改写后的SQL文本列表
+     */
+    @JvmStatic
+    fun rewriteAll(sql: String, dialect: ProductDialect, pipeline: SqlRewritePipeline): List<String> {
+        val ctx = ParseContext(sql, dialect)
+        val result = parse(ctx)
+        return result.statements.map { stmt ->
+            pipeline.rewrite(stmt, ctx).sourceText ?: stmt.sourceText ?: ""
+        }
     }
 
     /**

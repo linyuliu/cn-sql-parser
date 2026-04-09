@@ -181,10 +181,10 @@ usingClause : USING tableRef (COMMA tableRef)*;
 // ─── CREATE TABLE ─────────────────────────────────────────────────────────────
 
 createTableStatement
-    : CREATE TABLE (IF NOT NULL_KW)? tableName
+    : CREATE TABLE (IF NOT EXISTS)? tableName
       LPAREN createDefinition (COMMA createDefinition)* RPAREN
       tableOption*
-    | CREATE TABLE (IF NOT NULL_KW)? tableName tableOption* AS selectStatement
+    | CREATE TABLE (IF NOT EXISTS)? tableName tableOption* AS selectStatement
     ;
 
 createDefinition

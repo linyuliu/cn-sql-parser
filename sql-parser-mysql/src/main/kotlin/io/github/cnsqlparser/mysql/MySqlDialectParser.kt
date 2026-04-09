@@ -105,10 +105,7 @@ internal class MySqlAstVisitor(private val ctx: ParseContext) : MySqlParserBaseV
 
     override fun visitInsertStatement(insertCtx: MySqlParser.InsertStatementContext): Any {
         val tableName = insertCtx.tableName()
-        val table = TableRef(
-            name = tableName.id(0).text,
-            schema = if (tableName.id().size > 1) tableName.id(0).text else null
-        )
+        val table = tableRefFrom(tableName)
         return InsertStmt(
             table = table,
             sourceText = insertCtx.text,
@@ -120,10 +117,7 @@ internal class MySqlAstVisitor(private val ctx: ParseContext) : MySqlParserBaseV
 
     override fun visitUpdateStatement(updateCtx: MySqlParser.UpdateStatementContext): Any {
         val tableName = updateCtx.tableName()
-        val table = TableRef(
-            name = tableName.id(0).text,
-            schema = if (tableName.id().size > 1) tableName.id(0).text else null
-        )
+        val table = tableRefFrom(tableName)
         return UpdateStmt(
             table = table,
             assignments = emptyList(),
@@ -136,10 +130,7 @@ internal class MySqlAstVisitor(private val ctx: ParseContext) : MySqlParserBaseV
 
     override fun visitDeleteStatement(deleteCtx: MySqlParser.DeleteStatementContext): Any {
         val tableName = deleteCtx.tableName()
-        val table = TableRef(
-            name = tableName.id(0).text,
-            schema = if (tableName.id().size > 1) tableName.id(0).text else null
-        )
+        val table = tableRefFrom(tableName)
         return DeleteStmt(
             table = table,
             sourceText = deleteCtx.text,
@@ -151,10 +142,7 @@ internal class MySqlAstVisitor(private val ctx: ParseContext) : MySqlParserBaseV
 
     override fun visitCreateTableStatement(createCtx: MySqlParser.CreateTableStatementContext): Any {
         val tableName = createCtx.tableName()
-        val table = TableRef(
-            name = tableName.id(0).text,
-            schema = if (tableName.id().size > 1) tableName.id(0).text else null
-        )
+        val table = tableRefFrom(tableName)
         return CreateTableStmt(
             table = table,
             columns = emptyList(),
@@ -167,10 +155,7 @@ internal class MySqlAstVisitor(private val ctx: ParseContext) : MySqlParserBaseV
 
     override fun visitAlterTableStatement(alterCtx: MySqlParser.AlterTableStatementContext): Any {
         val tableName = alterCtx.tableName()
-        val table = TableRef(
-            name = tableName.id(0).text,
-            schema = if (tableName.id().size > 1) tableName.id(0).text else null
-        )
+        val table = tableRefFrom(tableName)
         return AlterTableStmt(
             table = table,
             actions = emptyList(),
@@ -200,5 +185,20 @@ internal class MySqlAstVisitor(private val ctx: ParseContext) : MySqlParserBaseV
             compatibilityMode = ctx.mode,
             position = ParsePosition(useCtx.start.line, useCtx.start.charPositionInLine)
         )
+    }
+
+    /**
+     * 从 tableName 规则上下文中提取正确的 name 和 schema
+     * tableName : id DOT id | id
+     * - 若有 2 个 id: id(0) = schema, id(1) = name
+     * - 若有 1 个 id: id(0) = name
+     */
+    private fun tableRefFrom(tableNameCtx: MySqlParser.TableNameContext): TableRef {
+        val ids = tableNameCtx.id()
+        return if (ids.size >= 2) {
+            TableRef(name = ids[1].text, schema = ids[0].text)
+        } else {
+            TableRef(name = ids[0].text)
+        }
     }
 }
