@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>io.github.cn-sql-parser</groupId>
+        <artifactId>sql-parser-parent</artifactId>
+        <version>1.0.0-SNAPSHOT</version>
+    </parent>
+    <artifactId>sql-audit</artifactId>
+    <name>cn-sql-parser :: Audit</name>
+    <description>SQL审核规则引擎 - SQL audit rules SPI engine</description>
+    <dependencies>
+        <dependency>
+            <groupId>io.github.cn-sql-parser</groupId>
+            <artifactId>sql-common</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.github.cn-sql-parser</groupId>
+            <artifactId>sql-model</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.github.cn-sql-parser</groupId>
+            <artifactId>sql-semantic</artifactId>
+        </dependency>
+    </dependencies>
+</project>
