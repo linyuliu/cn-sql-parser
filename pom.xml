@@ -35,6 +35,7 @@
         <module>sql-semantic</module>
         <module>sql-rewrite</module>
         <module>sql-audit</module>
+        <module>sql-dialect-converter</module>
         <module>sql-testkit</module>
     </modules>
 
@@ -135,6 +136,11 @@
             <dependency>
                 <groupId>io.github.cn-sql-parser</groupId>
                 <artifactId>sql-testkit</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.github.cn-sql-parser</groupId>
+                <artifactId>sql-dialect-converter</artifactId>
                 <version>${project.version}</version>
             </dependency>
 
