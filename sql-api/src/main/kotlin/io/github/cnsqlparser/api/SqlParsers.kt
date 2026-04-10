@@ -5,6 +5,8 @@ import io.github.cnsqlparser.audit.AuditViolation
 import io.github.cnsqlparser.common.CompatibilityMode
 import io.github.cnsqlparser.common.ParseContext
 import io.github.cnsqlparser.common.ProductDialect
+import io.github.cnsqlparser.converter.ConversionResult
+import io.github.cnsqlparser.converter.DialectConverter
 import io.github.cnsqlparser.druid.DruidParserBridge
 import io.github.cnsqlparser.druid.domestic.DomesticDatabaseSupport
 import io.github.cnsqlparser.jsqlparser.JSqlParserBridge
@@ -146,6 +148,64 @@ object SqlParsers {
     @JvmStatic
     fun format(sql: String, dialect: ProductDialect): String =
         druidBridge.format(sql, dialect, CompatibilityMode.DEFAULT)
+
+    // ─── Dialect Conversion ─────────────────────────────────────────────────
+
+    /**
+     * 方言转换：将SQL从一种方言转换为另一种方言
+     *
+     * Converts SQL from the source dialect to the target dialect.
+     *
+     * 使用示例：
+     * ```java
+     * // MySQL → Oracle
+     * ConversionResult result = SqlParsers.convert(
+     *     "SELECT * FROM users LIMIT 10",
+     *     ProductDialect.MYSQL,
+     *     ProductDialect.ORACLE
+     * );
+     * // result.getSql() → SELECT * FROM "users" FETCH FIRST 10 ROWS ONLY
+     *
+     * // Oracle → PostgreSQL
+     * ConversionResult result = SqlParsers.convert(
+     *     "SELECT NVL(name, 'unknown') FROM employees",
+     *     ProductDialect.ORACLE,
+     *     ProductDialect.POSTGRESQL
+     * );
+     * // result.getSql() → SELECT COALESCE("name", 'unknown') FROM "employees"
+     * ```
+     */
+    @JvmStatic
+    fun convert(sql: String, sourceDialect: ProductDialect, targetDialect: ProductDialect): ConversionResult {
+        val parseResult = parse(sql, sourceDialect)
+        return DialectConverter.convert(parseResult, targetDialect)
+    }
+
+    /**
+     * 方言转换（带兼容模式，适用于多模式国产数据库）
+     *
+     * Converts SQL from the source dialect (with compatibility mode) to the target dialect.
+     */
+    @JvmStatic
+    fun convert(
+        sql: String,
+        sourceDialect: ProductDialect,
+        sourceMode: CompatibilityMode,
+        targetDialect: ProductDialect
+    ): ConversionResult {
+        val parseResult = parse(sql, sourceDialect, sourceMode)
+        return DialectConverter.convert(parseResult, targetDialect)
+    }
+
+    /**
+     * 方言转换（从ParseResult转换）
+     *
+     * Converts a pre-parsed SQL result to the target dialect.
+     */
+    @JvmStatic
+    fun convert(parseResult: ParseResult, targetDialect: ProductDialect): ConversionResult {
+        return DialectConverter.convert(parseResult, targetDialect)
+    }
 
     // ─── Audit ────────────────────────────────────────────────────────────────
 

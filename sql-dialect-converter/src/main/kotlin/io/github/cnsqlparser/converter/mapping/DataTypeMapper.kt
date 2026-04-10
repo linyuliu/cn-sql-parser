@@ -31,13 +31,21 @@ object DataTypeMapper {
         val normalizedType = typeName.uppercase().trim()
         val key = MappingKey(normalizedType, from, to)
 
-        // Check exact mapping first
+        // Try parameterized type mappings first (more specific)
+        if (typeParams.isNotEmpty()) {
+            val paramMapping = parameterizedTypeMappings[key]
+            if (paramMapping != null) {
+                return paramMapping(typeParams)
+            }
+        }
+
+        // Check exact mapping
         val exactMapping = typeMappings[key]
         if (exactMapping != null) {
             return exactMapping.first to (exactMapping.second ?: typeParams)
         }
 
-        // Try parameterized type mappings
+        // Try parameterized mapping with empty params as fallback
         val paramMapping = parameterizedTypeMappings[key]
         if (paramMapping != null) {
             return paramMapping(typeParams)
