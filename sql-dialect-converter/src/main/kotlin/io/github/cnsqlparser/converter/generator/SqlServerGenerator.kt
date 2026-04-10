@@ -31,7 +31,8 @@ class SqlServerGenerator(sourceFamily: DialectFamily? = null) :
     override fun generateAutoIncrement(): String = "IDENTITY(1,1)"
 
     override fun generateIfNotExists(): String {
-        // SQL Server doesn't support IF NOT EXISTS in CREATE TABLE directly
+        // SQL Server doesn't support inline IF NOT EXISTS in CREATE TABLE syntax.
+        // For conditional table creation, use: IF NOT EXISTS (SELECT * FROM sys.objects WHERE ...)
         return ""
     }
 

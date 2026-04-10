@@ -388,7 +388,7 @@ class DialectConverterTest {
         }
 
         @Test
-        fun `Oracle to MySQL - FETCH FIRST converts to LIMIT`() {
+        fun `Oracle to MySQL - FetchSpec not supported in MySQL produces output without pagination`() {
             val fetch = FetchSpec(count = LiteralExpr(20, LiteralType.INTEGER))
             val fromItem = TableFromItem(name = "employees")
             val query = QueryBlock(
@@ -399,13 +399,12 @@ class DialectConverterTest {
             val stmt = SelectStmt(query = query, dialect = ProductDialect.ORACLE)
             val result = ParseResult(listOf(stmt), dialect = ProductDialect.ORACLE)
 
-            // MySQL generator doesn't support FETCH FIRST natively,
-            // but our generator handles it
+            // MySQL doesn't support FETCH FIRST natively.
+            // When FetchSpec is on the AST but the generator doesn't support it,
+            // the query is generated without pagination.
             val converted = DialectConverter.convert(result, ProductDialect.MYSQL)
-            // MySQL should not produce FETCH FIRST; but currently there's no
-            // automatic conversion of FetchSpec → LimitSpec in the AST.
-            // The generator will just skip it since MySQL doesn't support FETCH FIRST.
-            assertThat(converted.sql).isNotBlank()
+            assertThat(converted.sql).contains("SELECT * FROM `employees`")
+            assertThat(converted.sql).doesNotContain("FETCH FIRST")
         }
 
         @Test

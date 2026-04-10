@@ -99,7 +99,7 @@ object FunctionMapper {
         // ─── MySQL → Oracle ──────────────────────────────────────
         put(MappingKey("IFNULL", DialectFamily.MYSQL, DialectFamily.ORACLE), FunctionMapping("NVL"))
         put(MappingKey("NOW", DialectFamily.MYSQL, DialectFamily.ORACLE), FunctionMapping("SYSDATE"))
-        put(MappingKey("CURDATE", DialectFamily.MYSQL, DialectFamily.ORACLE), FunctionMapping("TRUNC(SYSDATE)", RewriteStrategy.CUSTOM))
+        put(MappingKey("CURDATE", DialectFamily.MYSQL, DialectFamily.ORACLE), FunctionMapping("TRUNC", RewriteStrategy.CUSTOM))
         put(MappingKey("CHAR_LENGTH", DialectFamily.MYSQL, DialectFamily.ORACLE), FunctionMapping("LENGTH"))
         put(MappingKey("CHARACTER_LENGTH", DialectFamily.MYSQL, DialectFamily.ORACLE), FunctionMapping("LENGTH"))
         put(MappingKey("SUBSTRING", DialectFamily.MYSQL, DialectFamily.ORACLE), FunctionMapping("SUBSTR"))
@@ -143,13 +143,13 @@ object FunctionMapper {
         // ─── PostgreSQL → Oracle ─────────────────────────────────
         put(MappingKey("STRING_AGG", DialectFamily.POSTGRESQL, DialectFamily.ORACLE), FunctionMapping("LISTAGG"))
         put(MappingKey("CURRENT_TIMESTAMP", DialectFamily.POSTGRESQL, DialectFamily.ORACLE), FunctionMapping("SYSTIMESTAMP"))
-        put(MappingKey("CURRENT_DATE", DialectFamily.POSTGRESQL, DialectFamily.ORACLE), FunctionMapping("TRUNC(SYSDATE)", RewriteStrategy.CUSTOM))
+        put(MappingKey("CURRENT_DATE", DialectFamily.POSTGRESQL, DialectFamily.ORACLE), FunctionMapping("TRUNC", RewriteStrategy.CUSTOM))
 
         // ─── PostgreSQL → SQL Server ─────────────────────────────
         put(MappingKey("COALESCE", DialectFamily.POSTGRESQL, DialectFamily.SQLSERVER), FunctionMapping("COALESCE"))
         put(MappingKey("STRING_AGG", DialectFamily.POSTGRESQL, DialectFamily.SQLSERVER), FunctionMapping("STRING_AGG"))
         put(MappingKey("CURRENT_TIMESTAMP", DialectFamily.POSTGRESQL, DialectFamily.SQLSERVER), FunctionMapping("GETDATE"))
-        put(MappingKey("CURRENT_DATE", DialectFamily.POSTGRESQL, DialectFamily.SQLSERVER), FunctionMapping("CAST(GETDATE() AS DATE)", RewriteStrategy.CUSTOM))
+        put(MappingKey("CURRENT_DATE", DialectFamily.POSTGRESQL, DialectFamily.SQLSERVER), FunctionMapping("CAST", RewriteStrategy.CUSTOM))
 
         // ─── SQL Server → MySQL ──────────────────────────────────
         put(MappingKey("ISNULL", DialectFamily.SQLSERVER, DialectFamily.MYSQL), FunctionMapping("IFNULL"))
